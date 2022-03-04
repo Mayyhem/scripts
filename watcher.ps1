@@ -1,12 +1,12 @@
 ### New-FileSystemWatcherAsynchronous
 
 # Set the folder target
-#$PathToMonitor = Read-Host -Prompt 'Enter a directory path to monitor'
+$PathToMonitor = Read-Host -Prompt 'Enter a directory path to monitor'
 $Global:DestPath = Read-Host -Prompt 'Enter a directory to copy files to'
 
 $FileSystemWatcher = New-Object System.IO.FileSystemWatcher
 $FileSystemWatcher.Path  = $PathToMonitor
-$FileSystemWatcher.IncludeSubdirectories = $false
+$FileSystemWatcher.IncludeSubdirectories = $true
 
 # Set emits events
 $FileSystemWatcher.EnableRaisingEvents = $true
@@ -27,7 +27,10 @@ $Action = {
     # Define change types
     switch ($ChangeType)
     {
-        'Changed' { "CHANGE" }
+        'Changed' { "CHANGE"
+                    Write-Host $DestPath
+                    Copy-Item "$FullPath" -Destination "$DestPath" -Force -Recurse -Verbose
+                  }
         'Created' { "CREATED"
                     Write-Host $DestPath
                     Copy-Item "$FullPath" -Destination "$DestPath" -Force -Recurse -Verbose
@@ -35,7 +38,7 @@ $Action = {
         'Deleted' { "DELETED"
                     # Set time intensive handler
                     Write-Host "Deletion Started" -ForegroundColor Gray
-                    Start-Sleep -Seconds 3    
+                    #Start-Sleep -Seconds 3    
                     Write-Warning -Message 'Deletion complete'
                   }
         'Renamed' { 
